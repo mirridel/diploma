@@ -1,0 +1,156 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+    <h1 class="text-center">Корзина</h1>
+    {% if cart %}
+        <div id="cart-container" class="row mt-4">
+            <div class="col-lg-8">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="mb-3">
+                            <a href="{% url 'store:catalog' %}" class="text-body">
+                                <i class="fas fa-long-arrow-alt-left me-2"></i>
+                                Продолжить покупки
+                            </a>
+                        </h5>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <p class="mb-0">У вас <span id="count">{{ cart|length }}</span> товара в корзине</p>
+                            </div>
+                            <div>
+                                <p class="mb-0"><span class="text-muted">Сортировать по:</span>
+                                    <a href="#" class="text-body">цене</a>
+                                </p>
+                            </div>
+                        </div>
+                        {% for product, item in cart.items %}
+                            <div id="product-card-{{ product.id }}" class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex flex-row align-items-center">
+                                            <div>
+                                                {% if product.image %}
+                                                    <img src="{{ product.image.url }}" class="img-fluid rounded-3"
+                                                         alt="{{ product.title }}" style="width: 65px;">
+                                                {% else %}
+                                                    <img src="{% static 'images/no_found.jpg' %}"
+                                                         class="img-fluid rounded-3"
+                                                         alt="{{ product.title }}" style="width: 65px;">
+                                                {% endif %}
+                                            </div>
+                                            <div class="ms-3">
+                                                <a href="{{ product.get_absolute_url }}"
+                                                   class="h5 text-black">{{ product.title }}</a>
+                                                <p class="small mb-0">{{ product.price }} ₽</p>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-row align-items-center">
+                                            <span>
+                                                <button class="minus-quantity btn btn-sm btn-outline-secondary mx-2"
+                                                        value="{{ product.id }}"><i class="bi bi-dash-lg"></i></button>
+                                            </span>
+                                            <span id="quantity-{{ product.id }}">{{ item.quantity }}</span>
+                                            <span>
+                                                <button class="plus-quantity btn btn-sm btn-outline-secondary mx-2"
+                                                        value="{{ product.id }}"><i class="bi bi-plus-lg"></i></button>
+                                            </span>
+                                            <span id="sum-{{ product.id }}">{% widthratio item.quantity 1 product.price %}</span><span>&nbsp;₽</span>
+                                            <button class="btn btn-outline-danger btn-sm delete-product mx-2"
+                                                    value="{{ product.id }}">
+                                                <i class=" bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card rounded-3">
+                    <div class="card-body">
+                        <h5 class="mb-3">Итого:</h5>
+                        <hr>
+                        <p>Товаров на сумму:&nbsp;<span id="total-sum">{{ sum }}</span>&nbsp;₽</p>
+                        <form action="{% url 'store:checkout' %}">
+                            <button type="submit" class="btn btn-secondary btn-lg w-100">
+                                Перейти к оформлению
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div id="empty-message" {% if cart %}hidden{% endif %}>
+        В корзине пусто.
+        <a href="{% url 'store:catalog' %}" class="text-body">
+            Продолжить покупки
+        </a>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="{% static 'js/store/cart.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.delete-product').click(function () {
+                const index = $(this).val();
+                const data = {"action": "DELETE", "product_id": index};
+                $.ajax({
+                    data: data,
+                    url: "{% url 'store:cart-handler' %}",
+                    success: function (response) {
+                        update_view(index, response);
+                    },
+                    error: function (response) {
+                        console.log(response.responseJSON.errors)
+                    }
+                });
+                return false;
+            });
+
+            $('.minus-quantity').click(function () {
+                const index = $(this).val();
+                const data = {"action": "UPDATE", "act": "MINUS", "product_id": index, "quantity": 1};
+                $.ajax({
+                    data: data,
+                    url: "{% url 'store:cart-handler' %}",
+                    success: function (response) {
+                        console.log(data)
+                        console.log(response)
+                        update_view(index, response);
+                    },
+                    error: function (response) {
+                        console.log(response.responseJSON.errors)
+                    }
+                });
+                return false;
+            });
+
+            $('.plus-quantity').click(function () {
+                const index = $(this).val();
+                const data = {"action": "UPDATE", "act": "PLUS", "product_id": index, "quantity": 1};
+                $.ajax({
+                    data: data,
+                    url: "{% url 'store:cart-handler' %}",
+                    success: function (response) {
+                        console.log(data);
+                        console.log(response);
+                        update_view(index, response);
+                    },
+                    error: function (response) {
+                        console.log(response.responseJSON.errors);
+                    }
+                });
+                return false;
+            });
+        })
+    </script>
+{% endblock javascript %}

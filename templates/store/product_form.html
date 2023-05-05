@@ -1,0 +1,10 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button class="btn btn-primary mb-2" type="submit">Подтвердить</button>
+    </form>
+{% endblock %}

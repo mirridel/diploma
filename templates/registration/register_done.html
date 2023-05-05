@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="mx-auto col col-xl-6">
+        <h3 class="text-center">Спасибо за регистрацию!</h3>
+        <p>Пожалуйста, проверьте свой электронный адрес и подтвердите его, чтобы завершить процесс регистрации.
+            Мы отправили вам письмо со ссылкой для подтверждения на адрес {{ email }}.
+            Если вы не получили письмо, проверьте папку со спамом.
+        </p>
+        <div class="text-center">
+            <a class="btn btn-primary" href="{% url 'index' %}">Перейти на главную</a>
+        </div>
+    </div>
+{% endblock %}

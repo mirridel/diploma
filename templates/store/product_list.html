@@ -1,0 +1,142 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+    <style>
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sm {
+            object-fit: cover;
+        }
+
+        .page-item.active .page-link {
+            color: #fff !important;
+            background: #f00 !important;
+        }
+    </style>
+
+
+    {% if category %}
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'store:catalog' %}">Каталог</a></li>
+            <li class="breadcrumb-item active">{{ category.name }}</li>
+        </ul>
+
+        <h1>{{ category.name }}</h1>
+        <hr>
+    {% endif %}
+
+    <div class="row">
+        {% if category %}
+            <div class="col-xl-3">
+                {% if perms.store.update_category %}
+                    <div class="card form-group p-3 mb-3 shadow-sm">
+                        <h4 class="text-center">Панель управления</h4>
+                        <form method="get">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2 col mx-left">
+                                <label>Категория</label>
+                                <button formaction="{% url 'store:category-update' category.id %}"
+                                        class="btn btn-secondary"
+                                        type="submit">
+                                    <i class="bi bi-pencil"></i>
+                                    Редактировать
+                                </button>
+                                <label>Товар</label>
+                                <button formaction="{% url 'store:product-create' category.id %}"
+                                        class="btn btn-secondary"
+                                        type="submit">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Добавить
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+                {# ФИЛЬТР #}
+                <div class="card form-group p-3 mb-3 shadow-sm">
+                    <h4 class="text-center">Фильтры</h4>
+                    <form action="" method="get">
+                        <label for="id_min_price" class="form-label">Минимальная цена</label>
+                        <input type="number" name="min_price" id="id_min_price" min="0" max="100000"
+                               class="form-control">
+                        <label for="id_max_price" class="form-label">Максимальная цена</label>
+                        <input type="number" name="max_price" id="id_max_price" min="0" max="100000"
+                               class="form-control">
+                        <button type="submit" class="btn btn-outline-success w-100 mt-2">
+                            <i class="bi bi-filter-circle"></i>
+                            Фильтровать
+                        </button>
+                        {% if request.GET %}
+                            <a href="{{ request.path }}" class="btn btn-outline-danger w-100 mt-2">
+                                <i class="bi bi-x-circle"></i>
+                                Сбросить
+                            </a>
+                        {% endif %}
+                    </form>
+                </div>
+                {# ФИЛЬТР #}
+            </div>
+        {% endif %}
+        {# БЛОК С ТОВАРАМИ #}
+        <div class="col-sm">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 pb-3">
+                <!-- Add row-cols-* classes for different breakpoints -->
+                {% for copy in page_obj %}
+                    {# CARD #}
+                    <div class="col mb-3">
+                        <div class="card mb-1 shadow-sm p-3"> <!-- Add the .h-100 class for each card -->
+                            <img class="card-img-top border rounded-3 img-fluid product-image" style="height: 15rem;
+    object-fit: cover;" src="
+                    {% if copy.image %}{{ copy.image.url }}{% else %}{% static 'images/no_found.jpg' %}{% endif %}"
+                                 alt="{{ copy.title }}">
+                            <div class="card-body text-center d-flex flex-column">
+                                <a href="{{ copy.get_absolute_url }}"
+                                   class="h4 card-title text-decoration-none text-dark mb-2"
+                                   style="height: 5rem; overflow: hidden;"
+                                   title="{{ copy.title }}"> {{ copy.title }}</a>
+                                <p class="card-text mb-2">{{ copy.price }} ₽</p>
+                            </div>
+                            <div class="card-floater text-center">
+                                <a href="{{ copy.get_absolute_url }}" class="btn btn-outline-success btn-sm">
+                                    Подробнее
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {# CARD #}
+                {% endfor %}
+            </div>
+        </div>
+        {# БЛОК С ТОВАРАМИ #}
+    </div>
+    {# ПАГИНАЦИЯ #}
+    <ul class="pagination justify-content-center m-3">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link"
+                                     href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+            </li>
+        {% endif %}
+        {% for n in page_obj.paginator %}
+            {% if n.number == page_obj.number %}
+                <li class="page-item"><a class="page-link active">{{ n.number }}</a></li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ n.number }} & {{ request.GET.urlencode }}">
+                        {{ n.number }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link"
+                                     href="?page={{ page_obj.next_page_number }}">&gt;</a></li>
+        {% endif %}
+    </ul>
+    {# ПАГИНАЦИЯ #}
+{% endblock %}
+

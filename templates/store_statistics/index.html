@@ -1,0 +1,179 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Статистика</h1>
+    <hr>
+    {% comment %}
+    + Заказы за определенное время
+    + Популярный материал
+    + Цвет
+    + Категория
+    + Статусы заказа
+    + Прибыль
+    {% endcomment %}
+    <div class="row">
+        <div class="col col-12 col-xl-3" style="background-color: transparent;">
+            <form class="form-control" method="post" action="">
+                {% csrf_token %}
+                <label class="form-label" for="start">От:</label>
+                <input class="form-control" type="date" id="start" name="start"
+                       value="{{ start_date.isoformat }}"
+                       min="2018-01-01" max="{% now "Y-m-d" %}">
+                <label class="form-label" for="end">До:</label>
+                <input class="form-control mb-2" type="date" id="end" name="end"
+                       value="{{ end_date.isoformat }}"
+                       min="2001-01-01" max="{% now "Y-m-d" %}">
+
+                <label class="form-label" for="spec_name">Название характеристики:</label>
+                <input class="form-control mb-2" type="text" id="spec_name" name="spec_name">
+
+                <div class="overflow-y-scroll" style="max-height: 10em">
+                    <ul id="specs-name-search" class="list-group"></ul>
+                </div>
+
+                <label class="form-label" for="spec_val">Значение характеристики:</label>
+                <input class="form-control mb-2" type="text" id="spec_val" name="spec_val">
+
+                <div class="mb-2 overflow-y-scroll" style="max-height: 10em">
+                    <ul id="specs-data-search" class="list-group"></ul>
+                </div>
+                {% comment %}
+                <label>
+                    Текст
+                    <input type="checkbox">
+                </label>
+                <label>
+                    Текст
+                    <input type="checkbox">
+                </label>
+                <label>
+                    Текст
+                    <input type="checkbox">
+                </label>
+                <label>
+                    Текст
+                    <input type="checkbox">
+                </label>
+                <label>
+                    Текст
+                    <input type="checkbox">
+                </label>
+                {% endcomment %}
+                <button class="mb-2 btn btn-primary w-100" type="submit">
+                    Проверить
+                </button>
+                <button class="mb-2 btn btn-danger w-100" type="reset" formaction="{% url "store_statistics:index" %}">
+                    Сбросить
+                </button>
+            </form>
+        </div>
+        <div class="col" style="background-color: transparent;">
+        {% comment %}
+        <h3>Кол-во заказов за все время: {{ orders_count }}</h3>
+        {% endcomment %}
+            <h3>Заказы</h3>
+            {% if orders_month %}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Количество заказов</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for order in orders_month reversed %}
+                        <tr>
+                            <td>{{ order.day }}</td>
+                            <td>{{ order.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <div>
+                    <canvas id="myChart"></canvas>
+                </div>
+            {% else %}
+                <h3>Не найдено!</h3>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <!-- SCRIPT BLOCK -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#spec_name").keyup(function () {
+                let text = $('#spec_name').val()
+                $.ajax({
+                    data: {"search_query": text},
+                    url: "{% url 'store:specs' %}",
+                    success: function (response) {
+                        $("#specs-name-search").empty();
+                        for (const key in response.result) {
+                            let element = $("<li></li>").text(response.result[key]).addClass("search-result list-group-item").click(function () {
+                                let text = $(this).text();
+                                $("#spec_name").val(text);
+                                $("#specs-name-search").empty();
+                            });
+                            $("#specs-name-search").append(element)
+                        }
+                    },
+                    error: function (response) {
+                        console.log(response.responseJSON.errors)
+                    }
+                })
+            });
+
+            $("#spec_val").keyup(function () {
+                let name = $('#spec_name').val()
+                let param = $('#spec_val').val()
+                if (param.length > 0) {
+                    $.ajax({
+                        data: {"search_query": name, "search_param": param},
+                        url: "{% url 'store:specs' %}",
+                        success: function (response) {
+                            console.log(response);
+                            $("#specs-data-search").empty();
+                            for (const key in response.result) {
+                                let element = $("<li></li>").text(response.result[key]).addClass("search-result-val list-group-item").click(function () {
+                                    let text = $(this).text();
+                                    $("#spec_val").val(text);
+                                    $("#specs-data-search").empty();
+                                });
+                                $("#specs-data-search").append(element)
+                            }
+                        },
+                        error: function (response) {
+                            console.log(response.responseJSON.errors)
+                        }
+                    })
+                }
+            });
+        })
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ labels|safe }},
+                datasets: [{
+                    label: 'Количество заказов',
+                    data: {{ data|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

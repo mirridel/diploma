@@ -1,0 +1,98 @@
+{% extends "base_generic.html" %}
+{% load has_group %}
+{% load static %}
+
+{% block content %}
+
+    {% if perms.store.edit_order %}
+        <div class="card m-2">
+            <div class="card-body">
+                <h4 class="card-title">Панель управления</h4>
+                <a class="btn btn-primary">Редактировать состав заказа</a>
+                <a class="btn btn-primary" href="{% url 'store:order-update' order.id %}">Редактировать</a>
+                <a class="btn btn-primary" href="{% url 'store:order-delete' order.id %}">Удалить</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card m-2 p-2">
+        <div class="card-header">
+            <h4 class="text-center">Заказ #{{ order.id }}</h4>
+            <p class="card-text text-center">Статус: {{ order.get_status }}</p>
+        </div>
+        <div class="card-body">
+
+            <h4>Клиент</h4>
+            <div class="overflow-x-scroll">
+                <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                        <td>Имя</td>
+                        <td>{{ order.first_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Фамилия</td>
+                        <td>{{ order.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Телефон</td>
+                        <td>{{ order.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td>Адрес</td>
+                        <td>{{ order.address }}</td>
+                    </tr>
+                    <tr>
+                        <td>Сообщение</td>
+                        <td>{{ order.message }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h4>Список товаров</h4>
+            <div class="overflow-x-scroll">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Продукт</th>
+                        <th>Кол-во</th>
+                        <th>Цена за шт.</th>
+                        <th>Сумма</th>
+                        {% if request.user|has_group:"admin" or request.user|has_group:"manager" %}
+                            <th>Действия</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for shoppingcart in order.shoppingcart_set.all %}
+                        <tr>
+                            <td>
+                                <a href="{{ shoppingcart.product.get_absolute_url }}">{{ shoppingcart.product.title }}</a>
+                            </td>
+                            <td>{{ shoppingcart.quantity }}</td>
+                            <td>{{ shoppingcart.price }} ₽</td>
+                            <td>{% widthratio shoppingcart.quantity 1 shoppingcart.price %} ₽</td>
+                            {% if request.user|has_group:"admin" or request.user|has_group:"manager" %}
+                                <td>None</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="card-footer">
+            <p class="card-text">
+                Дата и время заказа:
+                {{ order.creation_date_time }}
+            </p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+
+    </script>
+{% endblock javascript %}

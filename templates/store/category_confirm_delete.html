@@ -1,0 +1,8 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <form action="" method="post">{% csrf_token %}
+        <p>Вы уверены, что хотите удалить категорию "{{ object.name }}"?</p>
+        <button class="btn btn-primary mb-2" type="submit">Подтвердить</button>
+    </form>
+{% endblock %}

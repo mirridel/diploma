@@ -1,0 +1,15 @@
+{% extends "account/base.html" %}
+
+{% block account-content %}
+    <h3>Личные данные</h3>
+
+    <div>
+        <h5>Email:</h5>
+        <p>{{ user.email }}</p>
+    </div>
+
+    <div>
+        <h5>Клиентский номер, ID:</h5>
+        <p>{{ user.id }}</p>
+    </div>
+{% endblock %}

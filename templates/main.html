@@ -1,0 +1,148 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+    <style>
+        .item-customize {
+            height: 100%;
+            width: auto;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .carousel .carousel-indicators button {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ffc107;
+        }
+    </style>
+    {# КАРУСЕЛЬ #}
+    <div id="main-page-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" style="height: 10%;">
+        <div class="carousel-inner">
+            <div class="carousel-item active" data-bs-interval="5000">
+                <div class="card mb-3" style="">
+                    <div class="row g-0">
+                        <div class="col-md-6" style="overflow: hidden;">
+                            <img src="{% static 'images/carousel_1.jpg' %}" class="img-fluid item-customize rounded"
+                                 style="height:30em; width: 100%; object-fit: cover;"
+                                 alt="...">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="card-body">
+                                <h3 class="card-title text-center">Мы предлагаем широкий спектр услуг</h3>
+                                <ul class="list-unstyled mb-4 mb-md-auto">
+                                    <li>Мы занимаемся:
+                                        <ul>
+                                            <li>Установкой окон;</li>
+                                            <li>Монтажом межкомнатных дверей;</li>
+                                            <li>Обшивкой стен;</li>
+                                            <li>Отделкой балконов, лоджий;</li>
+                                            <li>Укладкой паркета, ковролина, ламината;</li>
+                                            <li>Изготовлением мебели и фурнитуры;</li>
+                                            <li>И многим другим!</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item" data-bs-interval="5000">
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-6">
+                            <img src="{% static 'images/carousel_2.jpeg' %}" class="rounded"
+                                 style="height:30em; width: 100%; object-fit: cover;"
+                                 alt="...">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="card-body text-center">
+                                <h3 class="card-title mb-4 mb-md-auto">
+                                    Наша команда опытных мастеров обеспечит высокое качество работы
+                                    и индивидуальный подход к каждому клиенту
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item" data-bs-interval="5000">
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-6">
+                            <img src="{% static 'images/carousel_3.jpg' %}" class="rounded"
+                                 style="height:30em; width: 100%; object-fit: cover;"
+                                 alt="..."
+                            >
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="card-body text-center">
+                                <h3 class="card-title mb-4 mb-md-auto">
+                                    Мы используем только качественные материалы и современное оборудование
+                                    для достижения наилучшего результата
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-indicators">
+                <div class="m-1 text-center rounded-5" style="background: rgba(122, 122, 122, 0.7);">
+                    &nbsp;
+                    <button type="button" data-bs-target="#main-page-carousel" data-bs-slide-to="0"
+                            class="active"
+                            aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#main-page-carousel" data-bs-slide-to="1"
+                            class=""
+                            aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#main-page-carousel" data-bs-slide-to="2"
+                            class=""
+                            aria-label="Slide 3"></button>
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    </div>
+    {# КАРУСЕЛЬ #}
+
+    <p>
+        <a class="h3" href="{% url 'store:catalog' %}">Каталог товаров ></a>
+    </p>
+
+    <div class="list-group">
+        {% for category in random_items %}
+            <a href="{{ category.get_absolute_url }}"
+               class="list-group-item list-group-item-action">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+    {% comment %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4">
+        {% for category in random_items %}
+            <div class="my-2 col">
+                <div class="card" style="height: 15em;">
+                    <img src="{% static 'images/header.jpg' %}" class="card-img h-100 w-auto" alt="..."
+                         style="overflow:hidden;">
+                    <div onclick="location.href='{{ category.get_absolute_url }}';"
+                         class="card-img-overlay d-flex align-items-center justify-content-center"
+                         style="background-color: rgba(255, 193, 7, 0.5);">
+                        <h5 class="card-title text-light text-uppercase">{{ category.name }}</h5>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <p>
+        Свяжитесь с нами для получения дополнительной информации или для оформления заказа.
+        Мы будем рады помочь вам в реализации ваших идей!
+    </p>
+    {% endcomment %}
+
+{% endblock %}

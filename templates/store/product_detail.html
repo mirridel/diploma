@@ -1,0 +1,136 @@
+{% extends "base_generic.html" %}
+{% load has_group %}
+{% load static %}
+
+{% block content %}
+    <ul class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'store:catalog' %}">Каталог</a></li>
+        <li class="breadcrumb-item"><a
+                href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></li>
+        <li class="breadcrumb-item active">{{ product.title }}</li>
+    </ul>
+    {# --- #}
+    <h1 class="m-2">{{ product.title }}</h1>
+    {# Панель управления #}
+    {% if perms.store.edit_product %}
+        <div class="card m-2">
+            <div class="card-body">
+                <h4 class="card-title">Панель управления</h4>
+                <form method="get">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 col-6 mx-left">
+                        <button formaction="{% url 'store:product-update' product.id %}" class="btn btn-primary"
+                                type="submit">Редактировать
+                        </button>
+                        <button formaction="{% url 'store:product-delete' product.id %}" class="btn btn-primary"
+                                type="submit">Удалить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    {# Фотография #}
+    <div class="card m-2">
+        <div class="row p-2">
+            {% comment %}
+            С XXL до Medium отступ снизу отсутствует
+            С Medium до XS отступ снизу равен 2
+            {% endcomment %}
+
+            <div class="col-md-4 mb-md-0 mb-2 text-center">
+                <img src="{% if product.image %} {{ product.image.url }} {% else %} {% static 'images/no_found.jpg' %} {% endif %}"
+                     class="img-fluid rounded border"
+                     alt="{{ product.title }}"/>
+            </div>
+            <div class="col-md">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="float-md-start">
+                            <h4 class="card-text">{{ product.price }} ₽</h4>
+                        </div>
+                        <div class="float-md-end">
+
+                            <button id="add-to-cart"
+                                    class="btn btn-outline-success {% if product|in_cart:request.session.cart %} active{% endif %}">
+                                {% if product|in_cart:request.session.cart %}
+                                    <i class="bi bi-bag-check"></i>
+                                    В корзине
+                                {% else %}
+                                    <i class="bi bi-bag"></i>
+                                    Добавить в корзину
+                                {% endif %}
+                            </button>
+
+                            <button id="add-to-favorites"
+                                    class="btn btn-outline-danger">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            <p class="card-text"><small class="text-muted">В наличии: {{ product.quantity }} шт.</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Описание #}
+    <div class="card m-2">
+        <div class="card-body">
+            <h4 class="card-title">Описание</h4>
+            <p class="card-text">
+                {% autoescape off %}
+                    {{ product.description }}
+                {% endautoescape %}
+            </p>
+        </div>
+    </div>
+    {# Характеристики #}
+    <div class="card m-2">
+        <div class="card-body">
+            <h4 class="card-title">Характеристики</h4>
+            {% if perms.store.update_specs %}
+                <a class="btn btn-primary" href="{% url 'store:add-spec' product.id %}"> Добавить </a>
+            {% endif %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tbody>
+                    {% for spec in product.specs_set.all %}
+                        <tr>
+                            <td>{{ spec.name }}</td>
+                            <td>{{ spec.val }}</td>
+                            {% if perms.store.update_specs %}
+                                <td>
+                                    <a class="btn btn-primary"
+                                       href="{% url 'store:update-spec' spec.id %}">
+                                        Редактировать
+                                    </a>
+                                    <a class="btn btn-primary"
+                                       href="{% url 'store:delete-spec' spec.id %}">
+                                        Удалить
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/store.js' %}"></script>
+    <script>
+        const pk = {{ product.id }};
+        $(document).ready(function () {
+            if ($('#add-to-cart').length) {
+                $('#add-to-cart').click(function () {
+                    add_to_cart("{% url 'store:cart-handler' %}", pk)
+                    return false;
+                })
+            }
+        })
+    </script>
+{% endblock javascript %}

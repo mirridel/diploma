@@ -1,0 +1,76 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    {% load static %}
+    <!-- Подключаем файл стилей -->
+    <link rel="stylesheet" href="{% static 'css/order_list.css' %}" media="screen">
+
+    {% url 'store:orders' as all_orders %}
+    {% url 'store:orders-by-status' 'created' as created_orders %}
+    {% url 'store:orders-by-status' 'confirmed' as confirmed_orders %}
+    {% url 'store:orders-by-status' 'closed' as closed_orders %}
+
+    <h1 class="text-center">Заказы</h1>
+
+    <p>Статус заказа:</p>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a {% if request.path == created_orders %} class="nav-link active" {% else %} class="nav-link"
+                                                       href="{{ created_orders }}" {% endif %}>
+                Создан
+            </a>
+        </li>
+        <li class="nav-item">
+            <a {% if request.path == confirmed_orders %} class="nav-link active" {% else %} class="nav-link"
+                                                         href="{{ confirmed_orders }}" {% endif %}>
+                Подтвержден
+            </a>
+        </li>
+        <li class="nav-item">
+            <a {% if request.path == closed_orders %} class="nav-link active" {% else %} class="nav-link"
+                                                      href="{{ closed_orders }}" {% endif %}>
+                Закрыт
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ all_orders }}">
+                Сбросить
+            </a>
+        </li>
+    </ul>
+
+    <div class="row">
+        <div class="col-12">
+            {% if order_list %}
+                {% for order in order_list %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Заказ #{{ order.id }}</h5>
+                            <p class="card-text">Дата и время заказа: {{ order.creation_date_time }}</p>
+                            <p class="card-text">Клиент: {{ order.client.username }}</p>
+                            {% if order.status == "CREATED" %}
+                                <p class="card-text">
+                                    <i class="bi bi-exclamation-circle text-danger"></i>
+                                    {{ order.get_status }}
+                                </p>
+                            {% elif order.status == "CLOSED" %}
+                                <p class="card-text">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                    {{ order.get_status }}
+                                </p>
+                            {% endif %}
+                            <a href="{{ order.get_absolute_url }}" class="btn btn-secondary">Подробнее</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Пусто</p>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script> </script>
+{% endblock javascript %}

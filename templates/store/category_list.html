@@ -10,9 +10,12 @@
 
     {% if perms.store.add_categories %}
         <div class="card mb-2">
-            <div class="card-body">
-                <h4 class="card-title">Панель управления</h4>
-                <a class="btn btn-primary" href="{% url 'store:category-create' %}">Добавить</a>
+            <div class="d-grid gap-2 card-body">
+                <h4 class="text-center card-title">Панель управления</h4>
+                <a href="{% url 'store:category-create' %}" class="text-light btn btn-warning">
+                    <i class="bi bi-plus-circle"></i>
+                    Добавить
+                </a>
             </div>
         </div>
     {% endif %}
@@ -20,14 +23,26 @@
     <div id="list-group" class="list-group">
         {% if category_list %}
             {% for category in category_list %}
-                <div class="list-group-item list-group-item-action">
-                    <a href="{{ category.get_absolute_url }}">
+                <div class="d-flex">
+                    <a class="list-group-item list-group-item-action" href="{{ category.get_absolute_url }}">
                         {{ category.name }}
-                        # category-delete
                     </a>
-                    <a href="{% url 'store:category-delete' category.id %}">
-                        Удалить
-                    </a>
+                    {% if perms.category_update %}
+                        <div>
+                            <a class="list-group-item list-group-item-action"
+                               href="{% url 'store:category-update' category.id %}">
+                                Редактировать
+                            </a>
+                        </div>
+                    {% endif %}
+                    {% if perms.category_delete %}
+                        <div>
+                            <a class="list-group-item list-group-item-action"
+                               href="{% url 'store:category-delete' category.id %}">
+                                Удалить
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         {% else %}

@@ -8,11 +8,10 @@
                 <a href="{{ order.get_absolute_url }}" class="list-group-item list-group-item-action"
                    aria-current="true">
                     <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">#{{ order.id }}</h5>
-                        <small>{{ order.order_date }}</small>
+                        <h5 class="mb-1">Заказ #{{ order.id }} <span class="badge bg-secondary">{{ order.get_status }}</span></h5>
+                        <small>{{ order.creation_date_time }}</small>
                     </div>
-                    <p class="mb-1"> {{ order.total }} </p>
-                    <small>Статус: {{ order.get_status }}</small>
+                    <p class="mb-1">Итого: {{ order.total }} ₽</p>
                 </a>
             {% endfor %}
         </div>

@@ -7,7 +7,7 @@ from django.utils import timezone
 
 
 class Category(models.Model):
-    name = models.CharField(verbose_name="Название", max_length=128)
+    name = models.CharField(verbose_name="Название", max_length=255)
 
     def __str__(self):
         return self.name
@@ -22,12 +22,14 @@ class Category(models.Model):
 class Product(models.Model):
     category = models.ForeignKey(Category, verbose_name="Категория", on_delete=models.CASCADE)
     title = models.CharField(verbose_name="Название",
-                             max_length=32)
+                             max_length=255)
     image = models.ImageField(verbose_name="Изображение",
                               upload_to='uploads/',
                               null=True,
                               blank=True)
-    price = models.PositiveIntegerField(verbose_name="Цена")
+    price = models.FloatField(verbose_name="Цена",
+                              validators=[MinValueValidator(0.0)],
+                              default=0.0)
     warranty = models.PositiveIntegerField(verbose_name="Гарантия")
     description = models.TextField(verbose_name="Описание",
                                    blank=True)
@@ -48,9 +50,9 @@ class Specs(models.Model):
         verbose_name_plural = "Характеристики"
 
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(verbose_name="Название", max_length=128)
-    description = models.CharField(verbose_name="Описание", default="", max_length=128)
-    val = models.CharField(verbose_name="Значение", default="", max_length=128)
+    name = models.CharField(verbose_name="Название", max_length=255)
+    description = models.CharField(verbose_name="Описание", default="", max_length=255)
+    val = models.CharField(verbose_name="Значение", default="", max_length=255)
 
     # Возвращаем ссылку на продукт
     def get_absolute_url(self):
@@ -75,14 +77,14 @@ class Order(models.Model):
     first_name = models.CharField(max_length=255, verbose_name="Имя", default="")
     last_name = models.CharField(max_length=255, verbose_name="Фамилия", default="")
     phone_regex = RegexValidator(regex=r'^\+7\d{10}$', message="Номер телефона должен быть в формате: '+7xxxxxxxxxx'.")
-    phone = models.CharField(validators=[phone_regex], verbose_name="Телефон", max_length=32, default="")
+    phone = models.CharField(validators=[phone_regex], verbose_name="Телефон", max_length=255, default="")
     address = models.CharField(max_length=255, verbose_name="Адрес", default="")
     message = models.TextField(blank=True, verbose_name="Сообщение", default="")
     total = models.FloatField(validators=[MinValueValidator(0.0)], default=0.0)
     # FOR SELLER
     creation_date_time = models.DateTimeField(default=timezone.now)
     modification_date_time = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(choices=order_statuses, max_length=128)
+    status = models.CharField(choices=order_statuses, max_length=255)
 
     def get_absolute_url(self):
         return reverse('store:order-detail', args=[str(self.id)])
@@ -102,8 +104,9 @@ class ShoppingCart(models.Model):
     order = models.ForeignKey(Order, verbose_name="Заказ", on_delete=models.CASCADE, default=None)
     product = models.ForeignKey(Product, verbose_name="Товар", on_delete=models.CASCADE)
     quantity = models.IntegerField(verbose_name="Количество")
-    price = models.IntegerField(verbose_name="Цена",
-                                null=True)
+    price = models.FloatField(verbose_name="Цена",
+                              validators=[MinValueValidator(0.0)],
+                              default=0.0)
 
     class Meta:
         verbose_name = "Состав заказа"

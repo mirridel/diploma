@@ -36,25 +36,20 @@
                 {% if perms.store.update_category %}
                     <div class="card form-group p-3 mb-3 shadow-sm">
                         <h4 class="text-center">Панель управления</h4>
-                        <form method="get">
-                            {% csrf_token %}
-                            <div class="d-grid gap-2 col mx-left">
-                                <label>Категория</label>
-                                <button formaction="{% url 'store:category-update' category.id %}"
-                                        class="btn btn-secondary"
-                                        type="submit">
-                                    <i class="bi bi-pencil"></i>
-                                    Редактировать
-                                </button>
-                                <label>Товар</label>
-                                <button formaction="{% url 'store:product-create' category.id %}"
-                                        class="btn btn-secondary"
-                                        type="submit">
-                                    <i class="bi bi-plus-circle"></i>
-                                    Добавить
-                                </button>
-                            </div>
-                        </form>
+                        <div class="d-grid gap-2 col mx-left">
+                            <label>Категория</label>
+                            <a href="{% url 'store:category-update' category.id %}"
+                               class="text-light btn btn-warning">
+                                <i class="bi bi-pencil"></i>
+                                Редактировать
+                            </a>
+                            <label>Товар</label>
+                            <a href="{% url 'store:product-create' category.id %}"
+                               class="text-light btn btn-warning">
+                                <i class="bi bi-plus-circle"></i>
+                                Добавить
+                            </a>
+                        </div>
                     </div>
                 {% endif %}
                 {# ФИЛЬТР #}
@@ -63,10 +58,10 @@
                     <form action="" method="get">
                         <label for="id_min_price" class="form-label">Минимальная цена</label>
                         <input type="number" name="min_price" id="id_min_price" min="0" max="100000"
-                               class="form-control">
+                               value="{{ min_price }}" class="form-control">
                         <label for="id_max_price" class="form-label">Максимальная цена</label>
                         <input type="number" name="max_price" id="id_max_price" min="0" max="100000"
-                               class="form-control">
+                               value="{{ max_price }}" class="form-control">
                         <button type="submit" class="btn btn-outline-success w-100 mt-2">
                             <i class="bi bi-filter-circle"></i>
                             Фильтровать

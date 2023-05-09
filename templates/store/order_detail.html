@@ -3,14 +3,18 @@
 {% load static %}
 
 {% block content %}
-
-    {% if perms.store.edit_order %}
+    {% if perms.store.change_order %}
         <div class="card m-2">
             <div class="card-body">
-                <h4 class="card-title">Панель управления</h4>
-                <a class="btn btn-primary">Редактировать состав заказа</a>
-                <a class="btn btn-primary" href="{% url 'store:order-update' order.id %}">Редактировать</a>
-                <a class="btn btn-primary" href="{% url 'store:order-delete' order.id %}">Удалить</a>
+                <h4 class="mb-2 text-center card-title">Панель управления</h4>
+                <a class="mb-2 text-light btn btn-warning w-100" href="{% url 'store:order-update' order.id %}">
+                    <i class="bi bi-pencil"></i>
+                    Редактировать
+                </a>
+                <a class="btn text-light btn-warning w-100" href="{% url 'store:order-delete' order.id %}">
+                    <i class="bi bi-trash"></i>
+                    Удалить
+                </a>
             </div>
         </div>
     {% endif %}
@@ -58,9 +62,11 @@
                         <th>Кол-во</th>
                         <th>Цена за шт.</th>
                         <th>Сумма</th>
+                        {% comment %}
                         {% if request.user|has_group:"admin" or request.user|has_group:"manager" %}
                             <th>Действия</th>
                         {% endif %}
+                        {% endcomment %}
                     </tr>
                     </thead>
                     <tbody>
@@ -72,13 +78,16 @@
                             <td>{{ shoppingcart.quantity }}</td>
                             <td>{{ shoppingcart.price }} ₽</td>
                             <td>{% widthratio shoppingcart.quantity 1 shoppingcart.price %} ₽</td>
+                            {% comment %}
                             {% if request.user|has_group:"admin" or request.user|has_group:"manager" %}
                                 <td>None</td>
                             {% endif %}
+                        {% endcomment %}
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+            <h4>Итого: {{ order.total|floatformat:"2" }} ₽</h4>
             </div>
 
         </div>

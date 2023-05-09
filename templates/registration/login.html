@@ -2,20 +2,24 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <div class="container py-3 col-lg-6">
+    <div class="container py-2">
         <h1 class="text-center">Вход</h1>
 
         {% if user.is_anonymous %}
             <form method="post" action="">
                 {% csrf_token %}
                 {{ form|crispy }}
-                <button id="submit" class="btn btn-primary mt-2 w-100" type="submit">Войти</button>
-                <p><a href="{% url 'password_reset' %}">Восстановить пароль</a></p>
-                <p><a href="{% url 'register' %}">Регистрация</a></p>
+                <button id="submit" class="my-2 w-100 text-light btn btn-warning" type="submit">Войти</button>
+                <div>
+                    <a href="{% url 'password_reset' %}">Восстановить пароль</a>
+                    <div class="float-end">
+                        <a href="{% url 'register' %}">Регистрация</a>
+                    </div>
+                </div>
             </form>
         {% else %}
             <p>Вы уже вошли в свою учетную запись.</p>
-            <a href="{% url 'index' %}" class="btn btn-primary">На главную страницу</a>
+            <a href="{% url 'index' %}" class="text-light btn btn-warning">На главную страницу</a>
         {% endif %}
     </div>
 {% endblock %}

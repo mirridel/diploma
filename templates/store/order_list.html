@@ -2,7 +2,6 @@
 
 {% block content %}
     {% load static %}
-    <!-- Подключаем файл стилей -->
     <link rel="stylesheet" href="{% static 'css/order_list.css' %}" media="screen">
 
     {% url 'store:orders' as all_orders %}
@@ -48,17 +47,14 @@
                             <h5 class="card-title">Заказ #{{ order.id }}</h5>
                             <p class="card-text">Дата и время заказа: {{ order.creation_date_time }}</p>
                             <p class="card-text">Клиент: {{ order.client.username }}</p>
-                            {% if order.status == "CREATED" %}
-                                <p class="card-text">
+                            <p class="card-text">
+                                {% if order.status == "CREATED" %}
                                     <i class="bi bi-exclamation-circle text-danger"></i>
-                                    {{ order.get_status }}
-                                </p>
-                            {% elif order.status == "CLOSED" %}
-                                <p class="card-text">
+                                {% elif order.status == "CLOSED" %}
                                     <i class="bi bi-check-circle text-success"></i>
-                                    {{ order.get_status }}
-                                </p>
-                            {% endif %}
+                                {% endif %}
+                                {{ order.get_status }}
+                            </p>
                             <a href="{{ order.get_absolute_url }}" class="btn btn-secondary">Подробнее</a>
                         </div>
                     </div>
@@ -70,7 +66,3 @@
     </div>
 
 {% endblock %}
-
-{% block javascript %}
-    <script> </script>
-{% endblock javascript %}

@@ -112,7 +112,10 @@ def category_detail_view(request, pk):
     paginator = Paginator(product_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, "store/product_list.html", {"category": category, "page_obj": page_obj})
+    return render(request, "store/product_list.html", {"category": category,
+                                                       "min_price": min_price,
+                                                       "max_price": max_price,
+                                                       "page_obj": page_obj})
 
 
 def product_detail_view(request, pk):
@@ -146,7 +149,7 @@ def specs(request):
 
 
 # CREATE
-@permission_required('store.specs_create')
+@permission_required('store.add_specs')
 def add_spec_view(request, pk=None):
     product = get_object_or_404(Product, pk=pk)
     _specs = Specs(product=product)
@@ -159,14 +162,14 @@ def add_spec_view(request, pk=None):
 
 
 # UPDATE
-@method_decorator(permission_required('store.specs_update'), name='dispatch')
+@method_decorator(permission_required('store.change_specs'), name='dispatch')
 class SpecsUpdate(UpdateView):
     model = Specs
     fields = ["name", "description", "val"]
 
 
 # DELETE
-@method_decorator(permission_required('store.specs_delete'), name='dispatch')
+@method_decorator(permission_required('store.delete_specs'), name='dispatch')
 class SpecsDelete(DeleteView):
     model = Specs
     fields = '__all__'
@@ -202,19 +205,19 @@ def order_detail_view(request, pk):
     return render(request, 'access_error.html')
 
 
-@method_decorator(permission_required('store.order_create'), name='dispatch')
+@method_decorator(permission_required('store.add_order'), name='dispatch')
 class OrderCreate(CreateView):
     model = Order
     fields = '__all__'
 
 
-@method_decorator(permission_required('store.order_update'), name='dispatch')
+@method_decorator(permission_required('store.change_order'), name='dispatch')
 class OrderUpdate(UpdateView):
     model = Order
     form_class = OrderForm
 
 
-@method_decorator(permission_required('store.order_delete'), name='dispatch')
+@method_decorator(permission_required('store.delete_order'), name='dispatch')
 class OrderDelete(DeleteView):
     model = Order
     fields = '__all__'
@@ -238,12 +241,12 @@ def cart_view(request):
 # CHECKOUT
 @login_required()
 def checkout_view(request):
-    _sum = 0
+    total = 0
     cart_hex = request.session.get('cart')
     cart = Cart()
     try:
         cart.hex_decode(cart_hex)
-        _sum = cart.get_total()
+        total = cart.get_total()
     except:
         request.session['cart'] = None
 
@@ -256,6 +259,7 @@ def checkout_view(request):
         if form.is_valid():
             order = form.save(commit=False)
             order.status = "CREATED"
+            order.total = total
             order.client = request.user
             order.save()
 
@@ -276,14 +280,14 @@ def checkout_view(request):
                 targets='Заказ №{}'.format(order.id),
                 paymentType="SB",
                 successURL=order.get_absolute_url(),
-                sum=_sum,
+                sum=total,
                 label='{}'.format(order.id)
             )
             return redirect(quick_pay.redirected_url)
     else:
         form = CheckoutForm()
 
-    return render(request, 'store/checkout.html', {'sum': _sum, 'form': form})
+    return render(request, 'store/checkout.html', {'sum': total, 'form': form})
 
 
 # GLOBAL SEARCH

@@ -3,10 +3,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, include
 from django.contrib.staticfiles.urls import static
 
-from account.views import register_request
+from account.views import register_view
 from diploma import views, settings
 
-# TODO: + ПРИВЯЗКА ПОЧТЫ
 # + СМЕНА ПАРОЛЯ
 # + ПРИ ОПЛАТЕ МЕНЯЛСЯ QUANTITY ПРОДУКТА
 # ? СТРАНИЦА С ОШИБКОЙ
@@ -24,16 +23,10 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('404', views.page_not_found_view, name='404')
-]
-
-urlpatterns += [
     path('accounts/', include('django.contrib.auth.urls')),
     path('login/', views.login_view, name='clogin'),
-    path('accounts/register/', register_request, name='register')
+    path('register/', register_view, name='register')
 ]
 
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-handler404 = "diploma.views.page_not_found_view"

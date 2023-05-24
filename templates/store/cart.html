@@ -10,7 +10,6 @@
                     <div class="card-body">
                         <h5 class="mb-3">
                             <a href="{% url 'store:catalog' %}" class="text-body">
-                                <i class="fas fa-long-arrow-alt-left me-2"></i>
                                 Продолжить покупки
                             </a>
                         </h5>
@@ -19,11 +18,13 @@
                             <div>
                                 <p class="mb-0">У вас <span id="count">{{ cart|length }}</span> товара в корзине</p>
                             </div>
+                            {% comment %}
                             <div>
                                 <p class="mb-0"><span class="text-muted">Сортировать по:</span>
                                     <a href="#" class="text-body">цене</a>
                                 </p>
                             </div>
+                            {% endcomment %}
                         </div>
                         {% for product, item in cart.items %}
                             <div id="product-card-{{ product.id }}" class="card mb-3">

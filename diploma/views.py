@@ -1,65 +1,29 @@
-import binascii
-import json
 import random
 import hashlib
-import uuid
 
-import requests
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from account.models import Confirmation, UserInfo
+from account.forms import CaptchaAuthenticationForm
 from store.cart_handler import Cart
-from store.forms import CaptchaAuthenticationForm
 from store.models import Order, Category
 
 from django.shortcuts import render, redirect
 
 from . import settings
-from .forms import NewUserForm
 from django.contrib.auth import login
-from django.contrib import messages
 
 
 def main(request):
     items = list(Category.objects.all())
     random_items = random.sample(items, 4)
-    print(request.META.get('HTTP_REFERER'))
-    print(request.META.get('HTTP_REFERER'))
     return render(
         request,
         'main.html',
         context={"random_items": random_items},
     )
-
-
-def page_not_found_view(request, exception='re'):
-    return render(request, '404.html', status=404)
-
-
-"""
-def register_request(request):
-    if request.method == "POST":
-        form = NewUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-
-            user_confirmation = Confirmation(user=user).save()
-            print()
-
-            login(request, user)
-            return redirect("index")
-        else:
-            print(form.errors.as_data())
-            for error in list(form.errors.values()):
-                print(error)
-                messages.error(request, error)
-    else:
-        form = NewUserForm()
-    return render(request=request, template_name="registration/register.html", context={"register_form": form})
-"""
 
 
 def ajax_update(request):
@@ -86,21 +50,15 @@ def get_user_ip(request):
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
     if request.method == "POST":
         form = CaptchaAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            try:
-                userinfo = get_object_or_404(UserInfo, user=user)
-                print(userinfo)
-            except Exception as ex:
-                print(ex)
-                userinfo = UserInfo(user=user, is_confirmed=True)
-                userinfo.save()
-            if userinfo.user.is_active:
+            if user.is_active:
                 login(request, user)
-            return redirect("/")
-
+            return redirect('index')
     else:
         form = CaptchaAuthenticationForm()
     return render(request, "registration/login.html", {"form": form})
@@ -122,7 +80,7 @@ def success(request):
         byte_string = str.encode(confirmation_string)
         hash_object = hashlib.sha1(byte_string)
         hex_dig = hash_object.hexdigest()
-        # Проверка на подлиность запроса
+        # Проверка на подлинность запроса
         if hex_dig == request.POST.get("sha1_hash"):
             label = request.POST.get("label")
             if label:

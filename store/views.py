@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.generic import CreateView, UpdateView, DeleteView
 
+from account.models import UserInfo
 from diploma import settings
 from store.models import Category, Product, Order, ShoppingCart, Specs
 from django.shortcuts import get_object_or_404
@@ -94,9 +95,9 @@ class ProductDelete(DeleteView):
 
 def category_detail_view(request, pk):
     category = get_object_or_404(Category, pk=pk)
-    product_list = category.product_set.all()  # получаем список всех продуктов
-    min_price = request.GET.get("min_price")  # получаем минимальную цену из запроса
-    max_price = request.GET.get("max_price")  # получаем максимальную цену из запроса
+    product_list = category.product_set.all()
+    min_price = request.GET.get("min_price")
+    max_price = request.GET.get("max_price")
     if min_price:
         try:
             min_price = int(min_price)
@@ -112,10 +113,10 @@ def category_detail_view(request, pk):
     paginator = Paginator(product_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, "store/product_list.html", {"category": category,
-                                                       "min_price": min_price,
-                                                       "max_price": max_price,
-                                                       "page_obj": page_obj})
+    return render(request, "store/product_list.html", context={"category": category,
+                                                               "min_price": min_price,
+                                                               "max_price": max_price,
+                                                               "page_obj": page_obj})
 
 
 def product_detail_view(request, pk):
@@ -190,7 +191,10 @@ def order_list_view(request):
 
 def order_list_by_status_view(request, status):
     if request.user.has_perm('store.view_order'):
-        order_list = Order.objects.filter(status__icontains=status)
+        if status:
+            order_list = Order.objects.filter(status__icontains=status)
+        else:
+            order_list = Order.objects.all()
         return render(request, 'store/order_list.html', {'order_list': order_list})
     return redirect('index')
 
@@ -250,13 +254,29 @@ def checkout_view(request):
     except:
         request.session['cart'] = None
 
+    initial = None
     if request.user.is_authenticated:
-        request.user.first_name = ""
+        user = request.user
+        user_info = UserInfo.objects.get(user=user)
+        initial = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "phone": user_info.phone
+        }
 
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
 
         if form.is_valid():
+
+            if request.user.first_name == "":
+                request.user.first_name = form.cleaned_data["first_name"]
+
+            if request.user.last_name == "":
+                request.user.last_name = form.cleaned_data["last_name"]
+
+            request.user.save()
+
             order = form.save(commit=False)
             order.status = "CREATED"
             order.total = total
@@ -269,7 +289,9 @@ def checkout_view(request):
 
             for key, item in cart.get_dict().items():
                 product = get_object_or_404(Product, pk=key)
-                shopping_cart = ShoppingCart(order=order, product=product, quantity=item["quantity"],
+                shopping_cart = ShoppingCart(order=order,
+                                             product=product,
+                                             quantity=item["quantity"],
                                              price=product.price)
                 shopping_cart.save()
             request.session['cart'] = None
@@ -285,7 +307,7 @@ def checkout_view(request):
             )
             return redirect(quick_pay.redirected_url)
     else:
-        form = CheckoutForm()
+        form = CheckoutForm(initial=initial)
 
     return render(request, 'store/checkout.html', {'sum': total, 'form': form})
 

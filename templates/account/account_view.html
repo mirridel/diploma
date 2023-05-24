@@ -1,7 +1,36 @@
 {% extends "account/base.html" %}
 
 {% block account-content %}
-    <h3>Личные данные</h3>
+    <h3>Личные данные
+        <span>
+        <a href="{% url 'account:edit' %}" class="btn btn-warning">
+            <i class="bi bi-pencil-square"></i>
+        </a>
+        </span>
+    </h3>
+
+    <div>
+        <h5>Клиентский номер, ID:</h5>
+        <p>{{ user.id }}</p>
+    </div>
+
+    <div>
+        <h5>Имя:</h5>
+        {% if user.first_name %}
+            <p>{{ user.first_name }}</p>
+        {% else %}
+            <p>Пусто</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <h5>Фамилия:</h5>
+        {% if user.last_name %}
+            <p>{{ user.last_name }}</p>
+        {% else %}
+            <p>Пусто</p>
+        {% endif %}
+    </div>
 
     <div>
         <h5>Email:</h5>
@@ -9,7 +38,11 @@
     </div>
 
     <div>
-        <h5>Клиентский номер, ID:</h5>
-        <p>{{ user.id }}</p>
+        <h5>Телефон:</h5>
+        {% if user_info.phone %}
+            <p>{{ user_info.phone }}</p>
+        {% else %}
+            <p>Пусто</p>
+        {% endif %}
     </div>
 {% endblock %}

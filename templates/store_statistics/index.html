@@ -13,8 +13,7 @@
     {% endcomment %}
     <div class="row">
         <div class="col col-12 col-xl-3" style="background-color: transparent;">
-            <form class="form-control" method="post" action="">
-                {% csrf_token %}
+            <form class="form-control" method="get" action="">
                 <label class="form-label" for="start">От:</label>
                 <input class="form-control" type="date" id="start" name="start"
                        value="{{ start_date.isoformat }}"
@@ -25,32 +24,31 @@
                        min="2001-01-01" max="{% now "Y-m-d" %}">
 
                 <label class="form-label" for="spec_name">Название характеристики:</label>
-                <input class="form-control mb-2" type="text" id="spec_name" name="spec_name">
+                <input class="form-control mb-2" type="text" id="spec_name" name="spec_name" value="{{ spec_name }}">
 
                 <div class="overflow-y-scroll" style="max-height: 10em">
                     <ul id="specs-name-search" class="list-group"></ul>
                 </div>
 
                 <label class="form-label" for="spec_val">Значение характеристики:</label>
-                <input class="form-control mb-2" type="text" id="spec_val" name="spec_val">
+                <input class="form-control mb-2" type="text" id="spec_val" name="spec_val" value="{{ spec_val }}">
 
                 <div class="mb-2 overflow-y-scroll" style="max-height: 10em">
                     <ul id="specs-data-search" class="list-group"></ul>
                 </div>
                 <button class="mb-2 btn btn-primary w-100" type="submit">
+                    <i class="bi bi-search"></i>
                     Проверить
                 </button>
-                <button class="mb-2 btn btn-danger w-100" type="reset" formaction="{% url "store_statistics:index" %}">
+                <a href="{{ request.path }}" class="mb-2 btn btn-danger w-100">
+                    <i class="bi bi-x-circle"></i>
                     Сбросить
-                </button>
+                </a>
             </form>
         </div>
         <div class="col" style="background-color: transparent;">
-            {% comment %}
-        <h3>Кол-во заказов за все время: {{ orders_count }}</h3>
-        {% endcomment %}
             <h3>Заказы</h3>
-            {% if orders_month %}
+            {% if table %}
                 {# ИНФОРМАЦИЯ #}
                 <div class="row">
                     <div class="col">
@@ -73,13 +71,15 @@
                         <tr>
                             <th>Дата</th>
                             <th>Количество заказов</th>
+                            <th>Количество оплаченных заказов</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for order in orders_month reversed %}
+                        {% for item in table reversed %}
                             <tr>
-                                <td>{{ order.day }}</td>
-                                <td>{{ order.count }}</td>
+                                <td>{{ item.date }}</td>
+                                <td>{{ item.all_orders_count }}</td>
+                                <td>{{ item.payed_orders_count }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

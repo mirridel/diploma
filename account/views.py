@@ -2,24 +2,46 @@ import uuid
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
 
+from account.forms import PersonalInformationForm, CaptchaRegistrationForm
 from account.models import Confirmation, UserInfo
 from diploma import settings
-from diploma.forms import NewUserForm
 
 
 @login_required()
 def account(request):
-    return render(request, 'account/account_view.html')
+    user_info = UserInfo.objects.get(user=request.user)
+    return render(request, 'account/account_view.html', context={"user_info": user_info})
 
 
 @login_required()
 def edit(request):
-    return render(request, 'account/orders_view.html')
+    user = User.objects.get(pk=request.user.id)
+    user_info = UserInfo.objects.get(user=user)
+    initial = {
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "phone": user_info.phone
+    }
+
+    if request.POST:
+        form = PersonalInformationForm(request.POST)
+        if form.is_valid():
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.save()
+            user_info.phone = form.cleaned_data['phone']
+            user_info.save()
+            return redirect('account:index')
+    else:
+        form = PersonalInformationForm(initial=initial)
+    return render(request, 'account/personal_information_form.html', context={'form': form})
 
 
 @login_required()
@@ -29,27 +51,12 @@ def orders(request):
 
 @login_required()
 def notifications_view(request):
-    email = "mixasibb@gmail.com"
-    data = """
-        Hello there!
-
-        I wanted to personally write an email in order to welcome you to our platform.
-         We have worked day and night to ensure that you get the best service. I hope
-        that you will continue to use our service. We send out a newsletter once a
-        week. Make sure that you read it. It is usually very informative.
-
-        Cheers!
-        ~ Name
-            """
-    send_mail('Welcome!', data, "Name",
-              [email], fail_silently=False)
-
     return render(request, 'account/notifications_view.html')
 
 
-def register_request(request):
+def register_view(request):
     if request.method == "POST":
-        form = NewUserForm(request.POST)
+        form = CaptchaRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
@@ -71,7 +78,7 @@ def register_request(request):
                     Команда [name]
                     """
 
-            confirmation_link = "http://{}/account/confirmation/{}/".format("37.194.20.87:8000", user_confirmation._uuid)
+            confirmation_link = "http://{}/account/confirmation/{}/".format(request.get_host(), user_confirmation.uuid)
 
             context = {
                 'link': confirmation_link,
@@ -92,7 +99,7 @@ def register_request(request):
 
             return render(request=request, template_name="registration/register_done.html", context={"email": email})
     else:
-        form = NewUserForm()
+        form = CaptchaRegistrationForm()
     return render(request=request, template_name="registration/register.html", context={"register_form": form})
 
 
@@ -107,9 +114,7 @@ def email_confirmation(request, token):
         return redirect('index')
     except Exception as ex:
         print(ex)
-        pass
-
-    return HttpResponse(token)
+        return HttpResponse(ex)
 
 
 def register_done(request):

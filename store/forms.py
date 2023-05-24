@@ -59,14 +59,6 @@ class AddSpecsForm(forms.ModelForm):
         self.fields['product'].initial = initial
 
 
-class CaptchaAuthenticationForm(AuthenticationForm):
-    recaptcha = ReCaptchaField(widget=ReCaptchaV3(attrs={
-        'required_score': 0.85
-    }), public_key=settings.RECAPTCHA_PUBLIC_KEY,
-        private_key=settings.RECAPTCHA_PRIVATE_KEY,
-        label=False)
-
-
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order

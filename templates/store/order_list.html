@@ -6,6 +6,7 @@
 
     {% url 'store:orders' as all_orders %}
     {% url 'store:orders-by-status' 'created' as created_orders %}
+    {% url 'store:orders-by-status' 'payed' as payed_orders %}
     {% url 'store:orders-by-status' 'confirmed' as confirmed_orders %}
     {% url 'store:orders-by-status' 'closed' as closed_orders %}
 
@@ -17,6 +18,12 @@
             <a {% if request.path == created_orders %} class="nav-link active" {% else %} class="nav-link"
                                                        href="{{ created_orders }}" {% endif %}>
                 Создан
+            </a>
+        </li>
+        <li class="nav-item">
+            <a {% if request.path == created_orders %} class="nav-link active" {% else %} class="nav-link"
+                                                       href="{{ payed_orders }}" {% endif %}>
+                Оплачен
             </a>
         </li>
         <li class="nav-item">

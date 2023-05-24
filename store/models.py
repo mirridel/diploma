@@ -73,7 +73,6 @@ class Order(models.Model):
     ]
 
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
-    # FOR CLIENT
     first_name = models.CharField(max_length=255, verbose_name="Имя", default="")
     last_name = models.CharField(max_length=255, verbose_name="Фамилия", default="")
     phone_regex = RegexValidator(regex=r'^\+7\d{10}$', message="Номер телефона должен быть в формате: '+7xxxxxxxxxx'.")
@@ -81,7 +80,6 @@ class Order(models.Model):
     address = models.CharField(max_length=255, verbose_name="Адрес", default="")
     message = models.TextField(blank=True, verbose_name="Сообщение", default="")
     total = models.FloatField(validators=[MinValueValidator(0.0)], default=0.0)
-    # FOR SELLER
     creation_date_time = models.DateTimeField(default=timezone.now)
     modification_date_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(choices=order_statuses, max_length=255)
